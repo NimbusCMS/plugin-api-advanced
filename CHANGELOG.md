@@ -13,3 +13,5 @@ to follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the plugin owns — the reason/IP/path for a rejection, and the token id/name and
   `resource:action` for a scope denial (never the presented token). An **API
   audit** admin page shows a 24-hour summary and the most recent failures.
+- Retention: a `nimbus prune` maintenance task drops audit rows older than
+  `API_AUDIT_RETENTION_DAYS` (default 30; `0` keeps everything).

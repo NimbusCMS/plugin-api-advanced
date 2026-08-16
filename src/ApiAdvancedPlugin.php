@@ -57,5 +57,19 @@ final class ApiAdvancedPlugin implements Plugin
             '🛡️',
             static fn (Request $request): string => (new AuditView())->html($log->recent(), $log->summary()),
         );
+
+        // Retention: `nimbus prune` drops audit rows older than the window
+        // (API_AUDIT_RETENTION_DAYS, default 30; 0 keeps everything).
+        $context->maintenance()->register('prune-audit', static function () use ($storage): int {
+            $days = (int) (getenv('API_AUDIT_RETENTION_DAYS') ?: '30');
+            if ($days <= 0) {
+                return 0;
+            }
+
+            return $storage()->execute(
+                'DELETE FROM ' . Schema::TABLE . ' WHERE occurred_at < :cutoff',
+                ['cutoff' => date('Y-m-d H:i:s', (int) strtotime("-{$days} days"))],
+            );
+        });
     }
 }
