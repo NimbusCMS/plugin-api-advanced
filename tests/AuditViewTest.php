@@ -21,7 +21,7 @@ final class AuditViewTest extends TestCase
         );
 
         self::assertStringContainsString('API audit', $html);
-        self::assertStringContainsString('5 rejected tokens', $html);
+        self::assertStringContainsString('<strong>5</strong> rejected tokens', $html);
         self::assertStringContainsString('CI', $html, 'the token name');
         self::assertStringContainsString('pages:read', $html, 'the denied resource:action');
     }
@@ -42,6 +42,6 @@ final class AuditViewTest extends TestCase
         $html = (new AuditView())->html([], []);
 
         self::assertStringContainsString('No API failures recorded', $html);
-        self::assertStringContainsString('0 rejected tokens', $html);
+        self::assertStringContainsString('<strong>0</strong> rejected tokens', $html);
     }
 }
