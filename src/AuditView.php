@@ -14,6 +14,7 @@ final class AuditView
     private const LABELS = [
         'token_rejected' => 'Token rejected',
         'access_denied'  => 'Access denied',
+        'entry_written'  => 'Entry written',
     ];
 
     /**
@@ -28,38 +29,40 @@ final class AuditView
 
         $rejected = $summary['token_rejected'] ?? 0;
         $denied   = $summary['access_denied'] ?? 0;
+        $writes   = $summary['entry_written'] ?? 0;
         $html .= '<p class="nb-muted">Last 24 hours: '
             . '<strong>' . $rejected . '</strong> rejected token' . ($rejected === 1 ? '' : 's') . ', '
-            . '<strong>' . $denied . '</strong> scope denial' . ($denied === 1 ? '' : 's') . '.</p>';
+            . '<strong>' . $denied . '</strong> scope denial' . ($denied === 1 ? '' : 's') . ', '
+            . '<strong>' . $writes . '</strong> write' . ($writes === 1 ? '' : 's') . '.</p>';
 
         if ($recent === []) {
             $html .= '<div class="nb-empty-panel"><span class="nb-empty-ic">🛡️</span>'
-                . '<h2>No API failures recorded</h2>'
-                . '<p>Rejected tokens and out-of-scope requests to the API will appear here.</p></div>';
+                . '<h2>Nothing recorded yet</h2>'
+                . '<p>API writes, rejected tokens, and out-of-scope requests will appear here.</p></div>';
 
             return $html;
         }
 
         $html .= '<table class="nb-table"><thead><tr>'
-            . '<th>When</th><th>Kind</th><th>Detail</th><th>Token</th><th>IP</th><th>Path</th>'
+            . '<th>When</th><th>Kind</th><th>Detail</th><th>Target</th><th>Token</th><th>IP</th>'
             . '</tr></thead><tbody>';
 
         foreach ($recent as $row) {
             $kind   = (string) ($row['kind'] ?? '');
-            $detail = $kind === 'access_denied'
-                ? $e($row['resource'] ?? '') . ':' . $e($row['action'] ?? 'read')
-                : $e($row['reason'] ?? '');
-            $token = $row['token_name'] !== null && $row['token_name'] !== ''
-                ? $e($row['token_name'])
-                : '<span class="nb-muted">—</span>';
+            $detail = match ($kind) {
+                'access_denied', 'entry_written' => $e($row['resource'] ?? '') . ':' . $e($row['action'] ?? ''),
+                default                          => $e($row['reason'] ?? ''),
+            };
+            $target = ($row['target'] ?? '') !== '' ? $e($row['target']) : '<span class="nb-muted">—</span>';
+            $token  = ($row['token_name'] ?? '') !== '' ? $e($row['token_name']) : '<span class="nb-muted">—</span>';
 
             $html .= '<tr>'
                 . '<td>' . $e($row['occurred_at'] ?? '') . '</td>'
                 . '<td>' . $e(self::LABELS[$kind] ?? $kind) . '</td>'
                 . '<td>' . $detail . '</td>'
+                . '<td>' . $target . '</td>'
                 . '<td>' . $token . '</td>'
                 . '<td>' . $e($row['ip'] ?? '') . '</td>'
-                . '<td>' . $e($row['path'] ?? '') . '</td>'
                 . '</tr>';
         }
 

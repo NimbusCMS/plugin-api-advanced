@@ -15,3 +15,7 @@ to follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   audit** admin page shows a 24-hour summary and the most recent failures.
 - Retention: a `nimbus prune` maintenance task drops audit rows older than
   `API_AUDIT_RETENTION_DAYS` (default 30; `0` keeps everything).
+- **Write auditing.** Also listens to core's `api.entry_written` event and records
+  each create/update/delete over the API — the acting token, the collection, and
+  the entry (its slug) — so the audit log is a full *who-changed-what* trail, not
+  just failures.

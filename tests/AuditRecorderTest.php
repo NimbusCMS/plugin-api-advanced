@@ -50,6 +50,22 @@ final class AuditRecorderTest extends TestCase
         self::assertSame('read', $row['action']);
     }
 
+    public function test_it_maps_a_write_from_a_collection_and_slug(): void
+    {
+        $row = $this->recorder->entry('entry_written', [
+            'token_id' => 5, 'token_name' => 'CI', 'collection' => 'posts', 'slug' => 'hello-world',
+            'action' => 'create', 'ip' => '198.51.100.9', 'path' => '/api/v1/collections/posts/entries',
+        ]);
+
+        self::assertIsArray($row);
+        self::assertSame('entry_written', $row['kind']);
+        self::assertSame('posts', $row['resource'], 'collection maps to resource');
+        self::assertSame('hello-world', $row['target'], 'slug maps to target');
+        self::assertSame('create', $row['action']);
+        self::assertSame(5, $row['token_id']);
+        self::assertNull($row['reason']);
+    }
+
     public function test_it_defaults_the_timestamp_when_absent(): void
     {
         $row = $this->recorder->entry('token_rejected', ['reason' => 'missing']);

@@ -35,14 +35,16 @@ final class AuditRecorder
 
         ($this->storage)()->insert(
             'INSERT INTO ' . Schema::TABLE . '
-                (kind, reason, token_id, token_name, resource, action, ip, path, occurred_at)
-             VALUES (:kind, :reason, :token_id, :token_name, :resource, :action, :ip, :path, :at)',
+                (kind, reason, token_id, token_name, resource, target, action, ip, path, occurred_at)
+             VALUES (:kind, :reason, :token_id, :token_name, :resource, :target, :action, :ip, :path, :at)',
             $row,
         );
     }
 
     /**
      * Map an event payload to a stored row, or null to skip a malformed one.
+     * Handles both failure payloads (which carry `resource`) and write payloads
+     * (which carry `collection` + `slug`).
      *
      * @return array<string,mixed>|null
      */
@@ -60,7 +62,8 @@ final class AuditRecorder
             'reason'     => $str('reason'),
             'token_id'   => $int('token_id'),
             'token_name' => $str('token_name'),
-            'resource'   => $str('resource'),
+            'resource'   => $str('resource') ?? $str('collection'),
+            'target'     => $str('slug'),
             'action'     => $str('action'),
             'ip'         => $str('ip'),
             'path'       => $str('path'),

@@ -26,6 +26,22 @@ final class AuditViewTest extends TestCase
         self::assertStringContainsString('pages:read', $html, 'the denied resource:action');
     }
 
+    public function test_it_renders_a_write_with_its_target(): void
+    {
+        $html = (new AuditView())->html(
+            [[
+                'kind' => 'entry_written', 'resource' => 'posts', 'action' => 'create', 'target' => 'hello-world',
+                'token_name' => 'CI', 'ip' => '198.51.100.9', 'occurred_at' => '2026-08-17 10:00:00',
+            ]],
+            ['entry_written' => 2],
+        );
+
+        self::assertStringContainsString('Entry written', $html);
+        self::assertStringContainsString('posts:create', $html);
+        self::assertStringContainsString('hello-world', $html, 'the target entry');
+        self::assertStringContainsString('<strong>2</strong> writes', $html);
+    }
+
     public function test_it_escapes_untrusted_values(): void
     {
         $html = (new AuditView())->html(
@@ -41,7 +57,8 @@ final class AuditViewTest extends TestCase
     {
         $html = (new AuditView())->html([], []);
 
-        self::assertStringContainsString('No API failures recorded', $html);
+        self::assertStringContainsString('Nothing recorded yet', $html);
         self::assertStringContainsString('<strong>0</strong> rejected tokens', $html);
+        self::assertStringContainsString('<strong>0</strong> writes', $html);
     }
 }
