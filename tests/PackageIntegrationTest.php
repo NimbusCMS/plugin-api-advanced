@@ -88,9 +88,14 @@ final class PackageIntegrationTest extends TestCase
         self::assertSame([], $diagnostics, 'a correctly installed package must load cleanly');
         self::assertSame([ApiAdvancedPlugin::ID => $this->manifest()['name']], $loader->registered());
 
-        self::assertSame(['nimbuscms.api-advanced:001_audit'], array_column($migrations->all(), 'name'), 'its migration');
+        self::assertSame(
+            ['nimbuscms.api-advanced:001_audit', 'nimbuscms.api-advanced:002_audit_target'],
+            array_column($migrations->all(), 'name'),
+            'its migrations',
+        );
         self::assertTrue($events->hasListeners(CoreEvents::API_TOKEN_REJECTED), 'the rejection listener');
         self::assertTrue($events->hasListeners(CoreEvents::API_ACCESS_DENIED), 'the scope-denial listener');
+        self::assertTrue($events->hasListeners(CoreEvents::API_ENTRY_WRITTEN), 'the write listener');
         self::assertSame(['api-audit'], array_column($adminPages->all(), 'slug'), 'its admin page');
         self::assertSame(['nimbuscms.api-advanced:prune-audit'], array_column($maintenance->all(), 'name'), 'its retention task');
     }

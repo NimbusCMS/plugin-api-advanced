@@ -33,6 +33,7 @@ final class ApiAdvancedPlugin implements Plugin
     public function register(PluginContext $context): void
     {
         $context->migrations()->register('001_audit', Schema::audit());
+        $context->migrations()->register('002_audit_target', Schema::auditTarget());
 
         $storage  = static fn (): PluginStorage => $context->storage();
         $recorder = new AuditRecorder($storage);
@@ -47,6 +48,12 @@ final class ApiAdvancedPlugin implements Plugin
             CoreEvents::API_ACCESS_DENIED,
             static function (mixed $payload) use ($recorder): void {
                 $recorder->record('access_denied', $payload);
+            },
+        );
+        $context->events()->listen(
+            CoreEvents::API_ENTRY_WRITTEN,
+            static function (mixed $payload) use ($recorder): void {
+                $recorder->record('entry_written', $payload);
             },
         );
 

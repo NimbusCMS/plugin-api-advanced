@@ -29,7 +29,7 @@ final class AuditLog
     public function recent(): array
     {
         return ($this->storage)()->select(
-            'SELECT kind, reason, token_id, token_name, resource, action, ip, path, occurred_at
+            'SELECT kind, reason, token_id, token_name, resource, target, action, ip, path, occurred_at
              FROM ' . Schema::TABLE . ' ORDER BY id DESC LIMIT ' . self::RECENT_LIMIT,
         );
     }
