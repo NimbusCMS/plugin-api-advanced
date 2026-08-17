@@ -37,7 +37,11 @@ final class Schema
         ];
     }
 
-    /** Adds the entry a write touched (its slug), for the write-audit trail. @return list<string> */
+    /**
+     * Adds the entry a write touched (its slug), for the write-audit trail.
+     *
+     * @return list<string>
+     */
     public static function auditTarget(): array
     {
         return ['ALTER TABLE ' . self::TABLE . ' ADD COLUMN target VARCHAR(191) NULL AFTER resource'];
