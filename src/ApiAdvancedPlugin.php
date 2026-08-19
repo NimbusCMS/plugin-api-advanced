@@ -15,10 +15,13 @@ use Nimbus\Support\CoreEvents;
  * features that don't belong in the lean core. The first is a **security audit
  * log** of API access failures.
  *
- * It listens to the core best-effort `api.token_rejected` and `api.access_denied`
- * events and records each into a table it owns, surfaced on an admin page. Those
- * events fire only *after* the per-IP flood guard, so a flood is already `429`'d
- * before it reaches here — the recording is bounded by the core rate limits.
+ * It listens to the core best-effort access events — `api.token_rejected`,
+ * `api.access_denied`, `api.entry_written` and `api.management_written` — and
+ * records each into a table it owns, surfaced on an admin page: a who-did-what
+ * trail of both failures and the content/structural writes an agent makes over
+ * MCP. The failure events fire only *after* the per-IP flood guard, so a flood is
+ * already `429`'d before it reaches here — recording is bounded by the core rate
+ * limits.
  *
  * It is the **second unrelated consumer** of the plugin event + storage
  * capabilities (after Analytics), the independent proof both were waiting for.
@@ -54,6 +57,15 @@ final class ApiAdvancedPlugin implements Plugin
             CoreEvents::API_ENTRY_WRITTEN,
             static function (mixed $payload) use ($recorder): void {
                 $recorder->record('entry_written', $payload);
+            },
+        );
+        // Management actions through the API/MCP — schema, media, users, tokens,
+        // settings (ADR 0009). The structural counterpart of entry_written, so an
+        // agent reshaping the CMS leaves a full who-did-what trail.
+        $context->events()->listen(
+            CoreEvents::API_MANAGEMENT_WRITTEN,
+            static function (mixed $payload) use ($recorder): void {
+                $recorder->record('management', $payload);
             },
         );
 

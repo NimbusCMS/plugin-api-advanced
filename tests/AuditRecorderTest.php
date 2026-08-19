@@ -66,6 +66,21 @@ final class AuditRecorderTest extends TestCase
         self::assertNull($row['reason']);
     }
 
+    public function test_it_maps_a_management_action_from_capability_and_target(): void
+    {
+        $row = $this->recorder->entry('management', [
+            'token_id' => 7, 'token_name' => 'agent', 'capability' => 'schema', 'action' => 'create_collection',
+            'target' => 'events', 'ip' => 'stdio', 'path' => 'mcp',
+        ]);
+
+        self::assertIsArray($row);
+        self::assertSame('management', $row['kind']);
+        self::assertSame('schema', $row['resource'], 'capability maps to resource');
+        self::assertSame('events', $row['target'], 'target maps through');
+        self::assertSame('create_collection', $row['action']);
+        self::assertSame(7, $row['token_id']);
+    }
+
     public function test_it_defaults_the_timestamp_when_absent(): void
     {
         $row = $this->recorder->entry('token_rejected', ['reason' => 'missing']);
