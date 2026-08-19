@@ -15,6 +15,7 @@ final class AuditView
         'token_rejected' => 'Token rejected',
         'access_denied'  => 'Access denied',
         'entry_written'  => 'Entry written',
+        'management'     => 'Management',
     ];
 
     /**
@@ -30,10 +31,12 @@ final class AuditView
         $rejected = $summary['token_rejected'] ?? 0;
         $denied   = $summary['access_denied'] ?? 0;
         $writes   = $summary['entry_written'] ?? 0;
+        $managed  = $summary['management'] ?? 0;
         $html .= '<p class="nb-muted">Last 24 hours: '
             . '<strong>' . $rejected . '</strong> rejected token' . ($rejected === 1 ? '' : 's') . ', '
             . '<strong>' . $denied . '</strong> scope denial' . ($denied === 1 ? '' : 's') . ', '
-            . '<strong>' . $writes . '</strong> write' . ($writes === 1 ? '' : 's') . '.</p>';
+            . '<strong>' . $writes . '</strong> write' . ($writes === 1 ? '' : 's') . ', '
+            . '<strong>' . $managed . '</strong> management action' . ($managed === 1 ? '' : 's') . '.</p>';
 
         if ($recent === []) {
             $html .= '<div class="nb-empty-panel"><span class="nb-empty-ic">🛡️</span>'
@@ -50,8 +53,8 @@ final class AuditView
         foreach ($recent as $row) {
             $kind   = (string) ($row['kind'] ?? '');
             $detail = match ($kind) {
-                'access_denied', 'entry_written' => $e($row['resource'] ?? '') . ':' . $e($row['action'] ?? ''),
-                default                          => $e($row['reason'] ?? ''),
+                'access_denied', 'entry_written', 'management' => $e($row['resource'] ?? '') . ':' . $e($row['action'] ?? ''),
+                default                                        => $e($row['reason'] ?? ''),
             };
             $target = ($row['target'] ?? '') !== '' ? $e($row['target']) : '<span class="nb-muted">—</span>';
             $token  = ($row['token_name'] ?? '') !== '' ? $e($row['token_name']) : '<span class="nb-muted">—</span>';

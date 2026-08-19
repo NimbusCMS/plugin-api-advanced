@@ -43,8 +43,8 @@ final class AuditRecorder
 
     /**
      * Map an event payload to a stored row, or null to skip a malformed one.
-     * Handles both failure payloads (which carry `resource`) and write payloads
-     * (which carry `collection` + `slug`).
+     * Handles failure payloads (which carry `resource`), content-write payloads
+     * (`collection` + `slug`), and management payloads (`capability` + `target`).
      *
      * @return array<string,mixed>|null
      */
@@ -62,8 +62,8 @@ final class AuditRecorder
             'reason'     => $str('reason'),
             'token_id'   => $int('token_id'),
             'token_name' => $str('token_name'),
-            'resource'   => $str('resource') ?? $str('collection'),
-            'target'     => $str('slug'),
+            'resource'   => $str('resource') ?? $str('collection') ?? $str('capability'),
+            'target'     => $str('target') ?? $str('slug'),
             'action'     => $str('action'),
             'ip'         => $str('ip'),
             'path'       => $str('path'),

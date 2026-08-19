@@ -96,6 +96,7 @@ final class PackageIntegrationTest extends TestCase
         self::assertTrue($events->hasListeners(CoreEvents::API_TOKEN_REJECTED), 'the rejection listener');
         self::assertTrue($events->hasListeners(CoreEvents::API_ACCESS_DENIED), 'the scope-denial listener');
         self::assertTrue($events->hasListeners(CoreEvents::API_ENTRY_WRITTEN), 'the write listener');
+        self::assertTrue($events->hasListeners(CoreEvents::API_MANAGEMENT_WRITTEN), 'the management listener');
         self::assertSame(['api-audit'], array_column($adminPages->all(), 'slug'), 'its admin page');
         self::assertSame(['nimbuscms.api-advanced:prune-audit'], array_column($maintenance->all(), 'name'), 'its retention task');
     }
